@@ -53,8 +53,9 @@ func postRequest() {
 }
 
 func main () {
+	// Call API 10 times, asynchronously, and time total time taken
 	var wg sync.WaitGroup
-
+	start := time.Now()
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
 		fmt.Println("Request number:", i)
@@ -64,5 +65,6 @@ func main () {
 			}()
 		}
 	wg.Wait()
+	fmt.Println("Total time taken:", time.Since(start))
 
 }
