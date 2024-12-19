@@ -12,44 +12,46 @@ import (
 )
 
 type APIOutput struct {
-		MainOutput string `json:"message" doc:"Restaurant suggestion"`
+		MainOutput int `json:"sum" doc:"Sum of numbers inputted"`
 	}
 
-func postRequest() {
+func postRequest() error {
 	start := time.Now()
 	// HTTP endpoint
-	posturl := "http://127.0.0.1:8888/addition"
+	postURL := "http://127.0.0.1:8888/addition"
 
 	// JSON body
 	body := []byte(`{
-		"numsToAdd": "1,2,3,4,5"
+		"numsToAdd": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 	}`)
 
 	// Create a HTTP post request
-	r, err := http.NewRequest("POST", posturl, bytes.NewBuffer(body))
+	r, err := http.NewRequest("POST", postURL, bytes.NewBuffer(body))
 	if err != nil {
-		panic(err)}
-		
+		return err
+	}
 
 	r.Header.Add("Content-Type", "application/json")
 	client := &http.Client{}
 	res, err := client.Do(r)
 	if err != nil {
-		panic(err)}
-		
+		return err
+	}
+
 	post := &APIOutput{}
 	derr := json.NewDecoder(res.Body).Decode(post)
 	if derr != nil {
-		panic(derr)
+		return derr
 	}
-	
+
 	if res.StatusCode != http.StatusOK {
 		fmt.Println("Status:", res.StatusCode)
-		panic(res.Status)
+		return fmt.Errorf("status: %s", res.Status)
 	}
 	full := time.Since(start)
 	fmt.Println("Sum:", post.MainOutput)
 	fmt.Println("Time taken:", full)
+	return nil
 }
 
 func main () {
@@ -61,7 +63,9 @@ func main () {
 		fmt.Println("Request number:", i)
 		go func() {
 			defer wg.Done()
-			postRequest()
+			if err := postRequest(); err != nil {
+				fmt.Println("Error:", err)
+			}
 			}()
 		}
 	wg.Wait()

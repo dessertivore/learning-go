@@ -5,8 +5,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -26,7 +24,7 @@ var Restaurants = map[int]string{
 }
 
 // Define a struct for the response
-type APIOutput struct {
+type RestaurantAPIOutput struct {
 	Body struct {
 		MainOutput string `json:"message" doc:"Output of API call"`
 }}
@@ -34,8 +32,12 @@ type APIOutput struct {
 // Define a struct for the addition input
 type AdditionInput struct {
 	Body struct {
-    Input string `json:"numsToAdd" maxLength:"100" doc:"Numbers to add together, comma-separated"`}
-}
+	Input []int `json:"numsToAdd" maxLength:"100" doc:"Numbers to add together, in a list."`
+}}
+type AdditionOutput struct {
+	Body struct {
+	Output int `json:"sum" maxLength:"100" doc:"Sum of inputted numbers."`
+}}
 
 func main() {
 	// Create a new router & API
@@ -50,8 +52,8 @@ func main() {
 		Summary:     "Pick a random restaurant for dinner.",
 		Description: "Pick a random restaurant.",
 		Tags:        []string{"Restaurants"},
-	}, func(ctx context.Context, input *struct{}) (*APIOutput, error) {
-		resp := &APIOutput{}
+	}, func(ctx context.Context, input *struct{}) (*RestaurantAPIOutput, error) {
+		resp := &RestaurantAPIOutput{}
 		resp.Body.MainOutput = Restaurants[rand.Intn(5)+1]
 		return resp, nil
 	})
@@ -63,24 +65,19 @@ func main() {
 		Summary:     "Sleep for a bit then add comma-separated numbers.",
 		Description: "A slow endpoint.",
 		Tags:        []string{"Addition","Sleep"},
-	}, func(ctx context.Context, input *AdditionInput) (*APIOutput, error) {
-		resp := &APIOutput{}
-		parts:=strings.Split(input.Body.Input, ",")
+	}, func(ctx context.Context, input *AdditionInput) (*AdditionOutput, error) {
+		resp := &AdditionOutput{}
 		
-		log.Printf("Parts: %v", parts)
+		log.Printf("Nums to sum: %v", input.Body.Input)
 
 		var sum int
-		for i:= 0; i<len(parts);i++ {
+		for _,num:= range input.Body.Input {
 			// Catch errors if invalid int provided
-			num, err := strconv.Atoi(parts[i])
-			if err != nil {
-				return nil, err
-			}
 			sum += num}
 		
 		// Sleep for 5 seconds to simulate a big query
 		time.Sleep(5 * time.Second)
-		resp.Body.MainOutput = strconv.Itoa(sum)
+		resp.Body.Output = sum
 		return resp, nil
 	})
 
