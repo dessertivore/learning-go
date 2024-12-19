@@ -7,5 +7,16 @@ go run .
 
 From another terminal:
 ```sh
-curl http://localhost:8888/restaurant
+curl http://localhost:8888/
+```
+
+# Endpoints:
+`/restaurant` - `GET`
+
+`/addition` - `POST` - e.g. `{"numsToAdd": "1,2,3,4,5"}` returns 
+```
+{
+    "$schema": "http://127.0.0.1:8888/schemas/APIOutputBody.json",
+    "message": "15"
+}
 ```
