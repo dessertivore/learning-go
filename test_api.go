@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"math/rand"
 	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -12,10 +12,19 @@ import (
 	_ "github.com/danielgtaylor/huma/v2/formats/cbor"
 )
 
+var Restaurants = map[int]string{
+	1:"Purezza",
+	2: "Temple of Seitan",
+	3: "Mildreds",
+	4: "Club Mexicana",
+	5: "Unity Diner",
+	6: "Dauns Deli",
+}
+
 // Define a struct for the response
-type GreetingOutput struct {
+type PickFood struct {
 	Body struct {
-		Message string `json:"message" example:"Hello, world!" doc:"Greeting message"`
+		RestaurantSuggestion string `json:"message" doc:"Restaurant suggestion"`
 	}
 }
 
@@ -24,12 +33,17 @@ func main() {
 	router := chi.NewMux()
 	api := humachi.New(router, huma.DefaultConfig("My API", "1.0.0"))
 
-	// Register GET /greeting/{name} handler.
-	huma.Get(api, "/greeting/{name}", func(ctx context.Context, input *struct{
-		Name string `path:"name" maxLength:"30" example:"world" doc:"Name to greet"`
-	}) (*GreetingOutput, error) {
-		resp := &GreetingOutput{}
-		resp.Body.Message = fmt.Sprintf("Hello, %s!", input.Name)
+	// Register GET /restaurant handler.
+	huma.Register(api, huma.Operation{
+		OperationID: "get-restaurant",
+		Method:      http.MethodGet,
+		Path:        "/restaurant",
+		Summary:     "Pick a random restaurant for dinner.",
+		Description: "Pick a random restaurant.",
+		Tags:        []string{"Restaurants"},
+	}, func(ctx context.Context, input *struct{}) (*PickFood, error) {
+		resp := &PickFood{}
+		resp.Body.RestaurantSuggestion = Restaurants[rand.Intn(5)+1]
 		return resp, nil
 	})
 
