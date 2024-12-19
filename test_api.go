@@ -2,8 +2,12 @@ package main
 
 import (
 	"context"
+	"log"
 	"math/rand"
 	"net/http"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/go-chi/chi/v5"
@@ -22,10 +26,15 @@ var Restaurants = map[int]string{
 }
 
 // Define a struct for the response
-type PickFood struct {
+type APIOutput struct {
 	Body struct {
-		RestaurantSuggestion string `json:"message" doc:"Restaurant suggestion"`
-	}
+		MainOutput string `json:"message" doc:"Restaurant suggestion"`
+	}}
+
+// Define a struct for the addition input
+type AdditionInput struct {
+	Body struct {
+    Input string `json:"numsToAdd" maxLength:"100" doc:"Numbers to add together, comma-separated"`}
 }
 
 func main() {
@@ -41,9 +50,35 @@ func main() {
 		Summary:     "Pick a random restaurant for dinner.",
 		Description: "Pick a random restaurant.",
 		Tags:        []string{"Restaurants"},
-	}, func(ctx context.Context, input *struct{}) (*PickFood, error) {
-		resp := &PickFood{}
-		resp.Body.RestaurantSuggestion = Restaurants[rand.Intn(5)+1]
+	}, func(ctx context.Context, input *struct{}) (*APIOutput, error) {
+		resp := &APIOutput{}
+		resp.Body.MainOutput = Restaurants[rand.Intn(5)+1]
+		return resp, nil
+	})
+	// Register POST /addition.
+	huma.Register(api, huma.Operation{
+		OperationID: "post-sleep-and-add",
+		Method:      http.MethodPost,
+		Path:        "/addition",
+		Summary:     "Sleep for a bit then add comma-separated numbers.",
+		Description: "A slow endpoint.",
+		Tags:        []string{"Addition","Sleep"},
+	}, func(ctx context.Context, input *AdditionInput) (*APIOutput, error) {
+		log.Printf("Input: %v", input)
+		resp := &APIOutput{}
+		parts:=strings.Split(input.Body.Input, ",")
+		log.Printf("Parts: %v", parts)
+
+		var sum int
+		for i:= 0; i<len(parts);i++ {
+			// Catch errors if invalid int provided
+			num, err := strconv.Atoi(parts[i])
+			if err != nil {
+				return nil, err
+			}
+			sum += num}
+		time.Sleep(5 * time.Second)
+		resp.Body.MainOutput = strconv.Itoa(sum)
 		return resp, nil
 	})
 
