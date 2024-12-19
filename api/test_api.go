@@ -28,8 +28,8 @@ var Restaurants = map[int]string{
 // Define a struct for the response
 type APIOutput struct {
 	Body struct {
-		MainOutput string `json:"message" doc:"Restaurant suggestion"`
-	}}
+		MainOutput string `json:"message" doc:"Output of API call"`
+}}
 
 // Define a struct for the addition input
 type AdditionInput struct {
@@ -64,9 +64,9 @@ func main() {
 		Description: "A slow endpoint.",
 		Tags:        []string{"Addition","Sleep"},
 	}, func(ctx context.Context, input *AdditionInput) (*APIOutput, error) {
-		log.Printf("Input: %v", input)
 		resp := &APIOutput{}
 		parts:=strings.Split(input.Body.Input, ",")
+		
 		log.Printf("Parts: %v", parts)
 
 		var sum int
@@ -77,6 +77,8 @@ func main() {
 				return nil, err
 			}
 			sum += num}
+		
+		// Sleep for 5 seconds to simulate a big query
 		time.Sleep(5 * time.Second)
 		resp.Body.MainOutput = strconv.Itoa(sum)
 		return resp, nil
