@@ -2,7 +2,7 @@
 
 To start the server:
 ```sh
-go run api/test_api.go
+go run api-huma/test_api.go
 ```
 
 From another terminal:
