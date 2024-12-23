@@ -1,4 +1,6 @@
-# 2 basic APIs, using Huma and Echo, with 2 endpoints
+# 2 basic APIs, using Huma and Echo, with 2 endpoints, and a Project Euler solution
+I've just made this repo to practise all things Go. As the title shows, it's a bit of 
+a mish mash of things!
 
 To start the Huma server:
 ```sh
@@ -44,3 +46,10 @@ API call takes 5 seconds, the full func should also only take around 5 seconds.
 `/restaurants` - `GET`
 
 `/addition` - `POST` - e.g. `curl -X POST http://127.0.0.1:8080/addition -H "Content-Type: application/json" -d '{"numsToAdd": "1,2,3,4,5"}'` returns `15`
+
+### Project Euler code
+```sh
+go run try-euhler/problem_1.go "1000"
+```
+To find all multiples of 3 and 5 under 1000. Can edit sys arg as desired to change
+upper limit.
