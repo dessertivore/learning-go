@@ -7,7 +7,7 @@ go run api/test_api.go
 
 From another terminal:
 ```sh
-curl http://localhost:8888/
+curl http://localhost:8888/restaurant
 ```
 
 ### Endpoints:
