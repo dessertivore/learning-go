@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"testing_go_apis/data"
 	"time"
 
@@ -20,6 +22,8 @@ type AdditionBody struct {
 }
 
 func addition(c echo.Context) error {
+	start := time.Now()
+
 	// Get nums to add from the request
 	nums := new(AdditionBody)
 	if err := c.Bind(nums); err != nil {
@@ -39,10 +43,23 @@ func addition(c echo.Context) error {
 	for _,num:= range numArray {
 		// Catch errors if invalid int provided
 		sum += num}
-		
-		// Sleep for 5 seconds to simulate a big query
-		time.Sleep(5 * time.Second)
 	
+	var wg sync.WaitGroup
+	// Repeat sleep 10 times, but asynchronously, so it will only take
+	// 5 seconds instead of 50 seconds
+	for i:=0; i<10; i++ {
+		wg.Add(1)
+		// Sleep for 5 seconds
+		go func() {
+			defer wg.Done()
+			fmt.Println("Sleeping for 5 seconds ", i ," times")
+			time.Sleep(5 * time.Second)
+		}()
+	}
+	wg.Wait()
+	fmt.Println("Total time taken:", time.Since(start))
+
+	// Return the sum as a string
 	return c.String(http.StatusOK, strconv.Itoa(sum))
 	}
 
@@ -58,7 +75,7 @@ func main() {
 	})
 	//  Return the dict of restaurants
 	e.GET("/restaurants", getRestaurants)
-	
+	// Add the numbers in the request and sleep 5 seconds * 10 times (asynchronously)
 	e.POST("/addition", addition)
 	e.Logger.Fatal(e.Start(":8080"))
 }

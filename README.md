@@ -46,6 +46,7 @@ API call takes 5 seconds, the full func should also only take around 5 seconds.
 `/restaurants` - `GET`
 
 `/addition` - `POST` - e.g. `curl -X POST http://127.0.0.1:8080/addition -H "Content-Type: application/json" -d '{"numsToAdd": "1,2,3,4,5"}'` returns `15`
+The addition endpoint here will sleep for 5 seconds, 10 times. As the `sleeping` is done asynchronously, the full function will take 5 seconds. Total time taken will be printed to console.
 
 ### Project Euler code
 ```sh
