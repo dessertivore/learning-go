@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -32,6 +33,18 @@ type AdditionOutput struct {
 	Body struct {
 		Output int `json:"sum" maxLength:"100" doc:"Sum of inputted numbers."`
 	}
+}
+
+type ShoppingList struct {
+	Body struct {
+		Items []string `json:"items" xml:"items" form:"items" query:"items"`
+	}
+}
+
+func addToShoppingList(listSoFar ShoppingList, additionalElement []string) ShoppingList {
+	// Add the items to the shopping list
+	listSoFar.Body.Items = append(listSoFar.Body.Items, additionalElement...)
+	return listSoFar
 }
 
 func main() {
@@ -77,6 +90,22 @@ func main() {
 		return resp, nil
 	})
 
+	// Register POST /shopping.
+	listSoFar := ShoppingList{}
+	huma.Register(api, huma.Operation{
+		OperationID: "post-shopping",
+		Method:      http.MethodPost,
+		Path:        "/shopping",
+		Summary:     "Add items to the shopping list.",
+		Description: "Add items to the shopping list.",
+		Tags:        []string{"Shopping"},
+	}, func(c context.Context, input *ShoppingList) (*ShoppingList, error) {
+		time.Sleep(1 * time.Second)
+		fmt.Println("Adding to shopping list:", input.Body.Items)
+		listSoFar = addToShoppingList(listSoFar, input.Body.Items)
+		fmt.Println("New shopping list:", listSoFar.Body.Items)
+		return &listSoFar, nil
+	})
 	// Start the server!
 	http.ListenAndServe("127.0.0.1:8888", router)
 }

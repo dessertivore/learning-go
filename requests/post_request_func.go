@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type APIOutput struct {
+type AdditionAPIOutput struct {
 	MainOutput int `json:"sum" doc:"Sum of numbers inputted"`
 }
 
@@ -16,44 +16,47 @@ type AdditionInput struct {
 	NumsToAdd []int `json:"numsToAdd"`
 }
 
-func PostAdditionRequest(nums []int) error {
-	start := time.Now()
-	// HTTP endpoint
-	postURL := "http://127.0.0.1:8888/addition"
+type ShoppingJSON struct {
+	Items []string `json:"items"`
+}
 
+func PostToHuma(endpoint string, input interface{}, output interface{}) (interface{}, error) {
+	start := time.Now()
+	// Construct the full URL
+	postURL := fmt.Sprintf("%s%s", "http://127.0.0.1:8888/", endpoint)
 	// JSON body
-	input := AdditionInput{NumsToAdd: nums}
+	// input := AdditionInput{NumsToAdd: nums}
 	jsonData, err := json.Marshal(input)
 	if err != nil {
-		return fmt.Errorf("error marshaling input: %v", err)
+		return nil, fmt.Errorf("error marshaling input: %v", err)
 	}
 	fmt.Println("Sending:", string(jsonData))
 
 	// Create a HTTP post request
 	r, err := http.NewRequest("POST", postURL, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	r.Header.Add("Content-Type", "application/json")
 	client := &http.Client{}
 	res, err := client.Do(r)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	post := &APIOutput{}
-	derr := json.NewDecoder(res.Body).Decode(post)
+	defer res.Body.Close()
+	derr := json.NewDecoder(res.Body).Decode(output)
 	if derr != nil {
-		return derr
+		fmt.Println("Error:", derr)
+		return nil, derr
 	}
 
 	if res.StatusCode != http.StatusOK {
 		fmt.Println("Status:", res.StatusCode)
-		return fmt.Errorf("status: %s", res.Status)
+		return nil, fmt.Errorf("status: %s", res.Status)
 	}
 	full := time.Since(start)
-	fmt.Println("Sum:", post.MainOutput)
+	fmt.Println("Output:", output)
 	fmt.Println("Time taken:", full)
-	return nil
+	return output, nil
 }
