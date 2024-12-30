@@ -4,7 +4,7 @@ a mish mash of things!
 
 To start the Huma server:
 ```sh
-go run api-huma/test_api.go
+make huma
 ```
 
 From another terminal:
@@ -14,7 +14,7 @@ curl http://localhost:8888/restaurant
 
 To start the Echo server:
 ```sh
-go run api-echo/test_api.go
+make echo
 ```
 From another terminal:
 ```sh
@@ -34,7 +34,7 @@ curl http://localhost:8080/restaurant
 
 ### To call /addition endpoint from this module
 ```sh
-go run requests/*.go
+make requests
 ```
 This will call the API 10 times in quick succession, in an asynchronous fashion,
 time each total request as well as the full func. As it is async, even though each
@@ -53,6 +53,6 @@ basic stateful API endpoint to test concurrency with stateful APIs.
 
 ### Project Euler code
 ```sh
-go run try-euler/*.go
+make euler
 ```
 Runs Project Euler problems 1 and 2, prints answers to console.
