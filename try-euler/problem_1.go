@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
-	"strconv"
 )
 
 
@@ -19,15 +17,10 @@ func getMultiples(n int) int {
 }
 
 
-func main() {
+func Problem1(num int) {
 	//  Defer the print statement until the end of the func
-	defer fmt.Println("The func is now complete...")
-	//  Extract int from sys args and run getMultiples
-	num := os.Args[1]
-	log.Println("Finding all multiples of 3 and 5 under "+num)
-	parsedNum, err := strconv.Atoi(num)
-	if err != nil {
-		panic(err)}
-	sum := getMultiples(parsedNum)
+	defer fmt.Println("The first Project Euler func is now complete...")
+	log.Println("Finding all multiples of 3 and 5 under ",num)
+	sum := getMultiples(num)
 	println(sum)
 }

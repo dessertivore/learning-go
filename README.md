@@ -50,7 +50,6 @@ The addition endpoint here will sleep for 5 seconds, 10 times. As the `sleeping`
 
 ### Project Euler code
 ```sh
-go run try-euhler/problem_1.go "1000"
+go run try-euler/*.go
 ```
-To find all multiples of 3 and 5 under 1000. Can edit sys arg as desired to change
-upper limit.
+Runs Project Euler problems 1 and 2, prints answers to console.
