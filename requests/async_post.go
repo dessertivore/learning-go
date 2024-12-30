@@ -41,25 +41,53 @@ import (
 
 // }
 
-func postAllFruit() {
+func postAllFruit(fruitList *ShoppingJSON) *ShoppingJSON {
 	var wg sync.WaitGroup
-	for _, i := range []string{"banana", "apple", "orange", "strawberries"} {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			resp, err := PostToHuma("shopping", ShoppingJSON{Items: []string{i}}, &ShoppingJSON{})
-			if err != nil {
-				fmt.Println("Error:", err)
-			}
-			fmt.Println(resp)
-		}()
+	// Create a channel to receive responses from goroutines
+	messages := make(chan *ShoppingJSON, 4)
+	// If fruitList is not nil and has items, send it to the API
+	if fruitList != nil && len(fruitList.Items) > 0 {
+		resp, err := PostToHuma("shopping", fruitList, &ShoppingJSON{})
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
+		respJSON, ok := resp.(*ShoppingJSON)
+		if !ok {
+			fmt.Println("Response is not a *ShoppingJSON")
+		}
+		// Send the response to the messages channel
+		messages <- respJSON
+		// If fruitList is nil or empty, send all fruits to the API, 1 by 1
+	} else {
+		for _, i := range []string{"banana", "apple", "orange", "strawberries"} {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				resp, err := PostToHuma("shopping", ShoppingJSON{Items: []string{i}}, &ShoppingJSON{})
+				if err != nil {
+					fmt.Println("Error:", err)
+				}
+				fmt.Println(resp)
+				respJSON, ok := resp.(*ShoppingJSON)
+				if !ok {
+					fmt.Println("Response is not a *ShoppingJSON")
+				}
+				// Send the response to the messages channel
+				messages <- respJSON
+
+			}()
+		}
 	}
+	// Close the messages channel once all goroutines are done
 	wg.Wait()
+	close(messages)
+	outerResp := <-messages
+	return outerResp
 }
 
 func main() {
 	// testingGoRoutineWithAndWithoutDefer()
-	for i := 0; i < 10; i++ {
-		postAllFruit()
-	}
+	resp := postAllFruit(*new(*ShoppingJSON))
+	resp = postAllFruit(resp)
+	fmt.Println("Final test output:", resp)
 }
