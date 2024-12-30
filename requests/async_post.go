@@ -15,18 +15,25 @@ type APIOutput struct {
 		MainOutput int `json:"sum" doc:"Sum of numbers inputted"`
 	}
 
-func postRequest() error {
+type AdditionInput struct {
+		NumsToAdd []int `json:"numsToAdd"`
+	}
+
+func postRequest(nums []int) error {
 	start := time.Now()
 	// HTTP endpoint
 	postURL := "http://127.0.0.1:8888/addition"
 
 	// JSON body
-	body := []byte(`{
-		"numsToAdd": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-	}`)
+	input := AdditionInput{NumsToAdd: nums}
+	jsonData, err := json.Marshal(input)
+    if err != nil {
+        return fmt.Errorf("error marshaling input: %v", err)
+    }
+	fmt.Println("Sending:", string(jsonData))
 
 	// Create a HTTP post request
-	r, err := http.NewRequest("POST", postURL, bytes.NewBuffer(body))
+	r, err := http.NewRequest("POST", postURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return err
 	}
@@ -55,20 +62,35 @@ func postRequest() error {
 }
 
 func main () {
-	// Call API 10 times, asynchronously, and time total time taken
-	var wg sync.WaitGroup
+	// Call API twice using a goroutine alongisde a synchronous func call
+	// The main goroutine does not wait for the new goroutine to complete, it only waits
+	// for the synchronous (blocking) function to complete before continuing to next
+	// iteration of loop
 	start := time.Now()
+	for i := 0; i < 2; i++ {
+		go postRequest([]int{1, 2, 3}) 
+		postRequest([]int{1, 2, 3})
+	}
+	fmt.Println("Time taken for 2 batches of concurrent requests:", time.Since(start))
+
+	// Call API 10 times, asynchronously, and time total time taken
+	// A new goroutine is created for each loop iteration- these all run concurrently
+	// with the main goroutine
+	var wg sync.WaitGroup
+	start = time.Now()
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
 		fmt.Println("Request number:", i)
 		go func() {
 			defer wg.Done()
-			if err := postRequest(); err != nil {
+			if err := postRequest([]int{5,6,7}); err != nil {
 				fmt.Println("Error:", err)
 			}
 			}()
 		}
+	// This blocks the main goroutine until the wg counter is at 0, i.e. all goroutines
+	// have completed
 	wg.Wait()
-	fmt.Println("Total time taken:", time.Since(start))
+	fmt.Println("Time taken for second part requests, i.e. 10 batches, all asynchronously run:", time.Since(start))
 
 }
