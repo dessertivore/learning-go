@@ -22,6 +22,10 @@ type AdditionBody struct {
 	NumsToAdd string `json:"numsToAdd" xml:"numsToAdd" form:"numsToAdd" query:"numsToAdd"`
 }
 
+type ShoppingList struct {
+	Items []string `json:"items" xml:"items" form:"items" query:"items"`
+}
+
 func addition(c echo.Context) error {
 	start := time.Now()
 
@@ -64,8 +68,15 @@ func addition(c echo.Context) error {
 	return c.String(http.StatusOK, strconv.Itoa(sum))
 }
 
+func addToShoppingList(listSoFar ShoppingList, additionalElement []string) ShoppingList {
+	// Add the items to the shopping list
+	listSoFar.Items = append(listSoFar.Items, additionalElement...)
+	return listSoFar
+}
+
 func main() {
 	e := echo.New()
+	listSoFar := ShoppingList{Items: []string{}}
 	//  Basic Hello World
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
@@ -78,5 +89,15 @@ func main() {
 	e.GET("/restaurants", getRestaurants)
 	// Add the numbers in the request and sleep 5 seconds * 10 times (asynchronously)
 	e.POST("/addition", addition)
+
+	// Add the item in the request to the shopping list and return the updated list
+	e.POST("/shopping", func(c echo.Context) error {
+		items := new(ShoppingList)
+		if err := c.Bind(items); err != nil {
+			return err
+		}
+		listSoFar = addToShoppingList(listSoFar, items.Items)
+		return c.JSON(http.StatusOK, listSoFar)
+	})
 	e.Logger.Fatal(e.Start(":8080"))
 }
