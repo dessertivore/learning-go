@@ -17,6 +17,7 @@ import (
 func getRestaurants(c echo.Context) error {
 	return c.JSON(http.StatusOK, data.Restaurants)
 }
+
 type AdditionBody struct {
 	NumsToAdd string `json:"numsToAdd" xml:"numsToAdd" form:"numsToAdd" query:"numsToAdd"`
 }
@@ -31,28 +32,28 @@ func addition(c echo.Context) error {
 	}
 	// Split the string of numbers into an array of ints
 	numStrings := strings.Split(nums.NumsToAdd, ",")
-    numArray := make([]int, len(numStrings))
-    for i := range numArray {
+	numArray := make([]int, len(numStrings))
+	for i := range numArray {
 		numArray[i], _ = strconv.Atoi(numStrings[i])
-    }
-	
+	}
+
 	log.Printf("Nums to add: %v", numArray)
 
-	
 	var sum int
-	for _,num:= range numArray {
+	for _, num := range numArray {
 		// Catch errors if invalid int provided
-		sum += num}
-	
+		sum += num
+	}
+
 	var wg sync.WaitGroup
 	// Repeat sleep 10 times, but asynchronously, so it will only take
 	// 5 seconds instead of 50 seconds
-	for i:=0; i<10; i++ {
+	for i := 0; i < 10; i++ {
 		wg.Add(1)
 		// Sleep for 5 seconds
 		go func() {
 			defer wg.Done()
-			fmt.Println("Sleeping for 5 seconds ", i ," times")
+			fmt.Println("Sleeping for 5 seconds ", i, " times")
 			time.Sleep(5 * time.Second)
 		}()
 	}
@@ -61,7 +62,7 @@ func addition(c echo.Context) error {
 
 	// Return the sum as a string
 	return c.String(http.StatusOK, strconv.Itoa(sum))
-	}
+}
 
 func main() {
 	e := echo.New()

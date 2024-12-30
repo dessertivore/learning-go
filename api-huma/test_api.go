@@ -19,17 +19,20 @@ import (
 type RestaurantAPIOutput struct {
 	Body struct {
 		MainOutput string `json:"message" doc:"Output of API call"`
-}}
+	}
+}
 
 // Define a struct for the addition input
 type AdditionInput struct {
 	Body struct {
-	Input []int `json:"numsToAdd" maxLength:"100" doc:"Numbers to add together, in a list."`
-}}
+		Input []int `json:"numsToAdd" maxLength:"100" doc:"Numbers to add together, in a list."`
+	}
+}
 type AdditionOutput struct {
 	Body struct {
-	Output int `json:"sum" maxLength:"100" doc:"Sum of inputted numbers."`
-}}
+		Output int `json:"sum" maxLength:"100" doc:"Sum of inputted numbers."`
+	}
+}
 
 func main() {
 	// Create a new router & API
@@ -56,17 +59,18 @@ func main() {
 		Path:        "/addition",
 		Summary:     "Sleep for a bit then add comma-separated numbers.",
 		Description: "A slow endpoint.",
-		Tags:        []string{"Addition","Sleep"},
+		Tags:        []string{"Addition", "Sleep"},
 	}, func(ctx context.Context, input *AdditionInput) (*AdditionOutput, error) {
 		resp := &AdditionOutput{}
-		
+
 		log.Printf("Nums to sum: %v", input.Body.Input)
 
 		var sum int
-		for _,num:= range input.Body.Input {
+		for _, num := range input.Body.Input {
 			// Catch errors if invalid int provided
-			sum += num}
-		
+			sum += num
+		}
+
 		// Sleep for 5 seconds to simulate a big query
 		time.Sleep(5 * time.Second)
 		resp.Body.Output = sum

@@ -5,7 +5,6 @@ import (
 	"log"
 )
 
-
 func getMultiples(n int) int {
 	var sum int
 	for i := 0; i < n; i++ {
@@ -16,11 +15,10 @@ func getMultiples(n int) int {
 	return sum
 }
 
-
 func Problem1(num int) {
 	//  Defer the print statement until the end of the func
 	defer fmt.Println("The first Project Euler func is now complete...")
-	log.Println("Finding all multiples of 3 and 5 under ",num)
+	log.Println("Finding all multiples of 3 and 5 under ", num)
 	sum := getMultiples(num)
 	println(sum)
 }

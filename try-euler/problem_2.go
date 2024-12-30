@@ -24,14 +24,15 @@ func Problem2() {
 	defer fmt.Println("The second Project Euler func is now complete...")
 	var sum int
 	var x int
-	
+
 	for fib(x) < 4000000 {
 		if fib(x)%2 == 0 {
 			{
 				sum += fib(x)
 			}
-		
+
 		}
 		x++
 	}
-	fmt.Println(sum)}
+	fmt.Println(sum)
+}

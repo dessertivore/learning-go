@@ -12,12 +12,12 @@ import (
 )
 
 type APIOutput struct {
-		MainOutput int `json:"sum" doc:"Sum of numbers inputted"`
-	}
+	MainOutput int `json:"sum" doc:"Sum of numbers inputted"`
+}
 
 type AdditionInput struct {
-		NumsToAdd []int `json:"numsToAdd"`
-	}
+	NumsToAdd []int `json:"numsToAdd"`
+}
 
 func postRequest(nums []int) error {
 	start := time.Now()
@@ -27,9 +27,9 @@ func postRequest(nums []int) error {
 	// JSON body
 	input := AdditionInput{NumsToAdd: nums}
 	jsonData, err := json.Marshal(input)
-    if err != nil {
-        return fmt.Errorf("error marshaling input: %v", err)
-    }
+	if err != nil {
+		return fmt.Errorf("error marshaling input: %v", err)
+	}
 	fmt.Println("Sending:", string(jsonData))
 
 	// Create a HTTP post request
@@ -61,14 +61,14 @@ func postRequest(nums []int) error {
 	return nil
 }
 
-func main () {
+func main() {
 	// Call API twice using a goroutine alongisde a synchronous func call
 	// The main goroutine does not wait for the new goroutine to complete, it only waits
 	// for the synchronous (blocking) function to complete before continuing to next
 	// iteration of loop
 	start := time.Now()
 	for i := 0; i < 2; i++ {
-		go postRequest([]int{1, 2, 3}) 
+		go postRequest([]int{1, 2, 3})
 		postRequest([]int{1, 2, 3})
 	}
 	fmt.Println("Time taken for 2 batches of concurrent requests:", time.Since(start))
@@ -83,11 +83,11 @@ func main () {
 		fmt.Println("Request number:", i)
 		go func() {
 			defer wg.Done()
-			if err := postRequest([]int{5,6,7}); err != nil {
+			if err := postRequest([]int{5, 6, 7}); err != nil {
 				fmt.Println("Error:", err)
 			}
-			}()
-		}
+		}()
+	}
 	// This blocks the main goroutine until the wg counter is at 0, i.e. all goroutines
 	// have completed
 	wg.Wait()
