@@ -44,19 +44,23 @@ import (
 func postAllFruit(fruitList *ShoppingJSON) *ShoppingJSON {
 	var wg sync.WaitGroup
 	// Create a channel to receive responses from goroutines
-	messages := make(chan *ShoppingJSON, 4)
+	messages := make(chan *ShoppingJSON)
 	// If fruitList is not nil and has items, send it to the API
 	if fruitList != nil && len(fruitList.Items) > 0 {
-		resp, err := PostToHuma("shopping", fruitList, &ShoppingJSON{})
-		if err != nil {
-			fmt.Println("Error:", err)
-		}
-		respJSON, ok := resp.(*ShoppingJSON)
-		if !ok {
-			fmt.Println("Response is not a *ShoppingJSON")
-		}
-		// Send the response to the messages channel
-		messages <- respJSON
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			resp, err := PostToHuma("shopping", fruitList, &ShoppingJSON{})
+			if err != nil {
+				fmt.Println("Error:", err)
+			}
+			respJSON, ok := resp.(*ShoppingJSON)
+			if !ok {
+				fmt.Println("Response is not a *ShoppingJSON")
+			}
+			// Send the response to the messages channel
+			messages <- respJSON
+		}()
 		// If fruitList is nil or empty, send all fruits to the API, 1 by 1
 	} else {
 		for _, i := range []string{"banana", "apple", "orange", "strawberries"} {
@@ -74,20 +78,25 @@ func postAllFruit(fruitList *ShoppingJSON) *ShoppingJSON {
 				}
 				// Send the response to the messages channel
 				messages <- respJSON
-
 			}()
 		}
 	}
 	// Close the messages channel once all goroutines are done
-	wg.Wait()
-	close(messages)
-	outerResp := <-messages
-	return outerResp
+	// This must be done in a goroutine or the main goroutine will never exit
+	go func() {
+		wg.Wait()
+		close(messages)
+	}()
+	storedMessages := &ShoppingJSON{}
+	for msg := range messages {
+		storedMessages.Items = append(storedMessages.Items, msg.Items...)
+	}
+	return storedMessages
 }
 
 func main() {
 	// testingGoRoutineWithAndWithoutDefer()
-	resp := postAllFruit(*new(*ShoppingJSON))
-	resp = postAllFruit(resp)
+	resp := postAllFruit(nil)
+	// resp = postAllFruit(resp)
 	fmt.Println("Final test output:", resp)
 }
